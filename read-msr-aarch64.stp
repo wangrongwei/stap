@@ -1,0 +1,48 @@
+#!/usr/bin/env stap -g
+
+# usage: stap -g read-msr-aarch64.stp
+
+%{
+#include <linux/types.h>
+#include <linux/errno.h>
+#include <linux/fcntl.h>
+#include <linux/init.h>
+#include <linux/poll.h>
+#include <linux/smp.h>
+#include <linux/major.h>
+#include <linux/fs.h>
+#include <linux/device.h>
+#include <linux/cpu.h>
+#include <linux/notifier.h>
+#include <linux/uaccess.h>
+#include <linux/gfp.h>
+#include <linux/slab.h>
+#include <linux/kernel.h>
+#include <asm/cpufeature.h>
+#include <asm/cpu.h>
+#include <asm/sysreg.h>
+#include <asm/insn.h>
+#include <asm/fixmap.h>
+#include <asm-generic/fixmap.h>
+#include <asm/traps.h>
+#include <asm/atomic.h>
+#include <linux/printk.h>
+%}
+
+# TODO: If the register is undef, and occurs to PANIC.
+function read_msr_aarch64()
+%{
+	unsigned long val = 0;
+	/* The MIDR_EL1 will been read. */
+	asm volatile("mrs %0, MIDR_EL1\n\t"
+	: "=r"(val)::);
+	printk("val: 0x%lx", val);
+	STAP_PRINTF("val: 0x%lx", val);
+%}
+
+probe begin
+{
+	print("read msr\n");
+	read_msr_aarch64();
+	exit();
+}
