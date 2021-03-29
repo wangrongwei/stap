@@ -37,7 +37,7 @@ function read_msr_aarch64()
 	asm volatile("mrs %0, MIDR_EL1\n\t"
 	: "=r"(val)::);
 	printk("val: 0x%lx", val);
-	STAP_PRINTF("val: 0x%lx", val);
+	STAP_PRINTF("val: 0x%lx\n", val);
 %}
 
 probe begin
